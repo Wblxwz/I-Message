@@ -1,4 +1,5 @@
 ﻿#pragma once
+#pragma comment(lib,"ws2_32.lib")
 
 #include <QtWidgets/QMainWindow>
 #include "ui_IMessage.h"
@@ -15,6 +16,7 @@ public:
 	IMessage(QWidget* parent = nullptr);
 	void init();
 	void signUp();
+	void signUpToServer();
 	~IMessage();
 private:
 	Ui::IMessageClass* ui;
