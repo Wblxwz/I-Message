@@ -7,9 +7,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
-#include "connpool.h"
 
+#include "connpool.h"
+#include "connraii.h"
 #include "server.h"
+#include "sqloperate.h"
+#include "worker.h"
+#include "threadpool.h"
 
 void setNonBlock(const int& fd)
 {
@@ -30,22 +34,17 @@ void addFd(const int& epollfd, const int& fd, bool ONESHOT)
 	assert(epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &events) != -1);
 }
 
-void signUp(const std::string& s)
+void modFd(const int& epollfd, const int& fd)
 {
-	char name[16]{ '0' };
-	char pwd[16]{ '0' };
-	int n = s.find("pwd:");
-	int x = 0;
-	for (int i = 5; i < n; ++i)
-		name[x++] = s[i];
-	x = 0;
-	n += 4;
-	for (int i = n; i < s.size(); ++i)
-		pwd[x++] = s[i];
+	epoll_event events;
+	events.data.fd = fd;
+	events.events = EPOLLIN | EPOLLET | EPOLLHUP | EPOLLONESHOT;
+	epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &events);
 }
 
 void serverListen()
 {
+	ThreadPool* pool = ThreadPool::getThreadPool();
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	assert(listenfd >= 0);
 	sockaddr_in addr;
@@ -82,20 +81,16 @@ void serverListen()
 					int connfd = accept(listenfd, (sockaddr*)&caddr, &tmplen);
 					if (connfd < 0)
 						break;
-					addFd(epollfd, connfd, true);
+					addFd(epollfd, connfd, false);
 				}
 			}
 			else if (eve[i].events & EPOLLIN)
 			{
 				int cfd = eve[i].data.fd;
-				char buf[1024]{ '0' };
-				recv(cfd, buf, sizeof(buf), NULL);
+				modFd(epollfd, cfd);
 
-				std::string s(buf);
-				if (s.find("name:") != -1)
-					signUp(s);
-
-				send(cfd, buf, strlen(buf), 0);
+				Worker* worker = new Worker(cfd);
+				pool->add(worker);
 			}
 		}
 	}

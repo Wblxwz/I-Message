@@ -17,7 +17,10 @@ public:
 	void init();
 	void signUp();
 	void signUpToServer();
+	void logIn();
+	const int getNewCfd();
 	~IMessage();
 private:
 	Ui::IMessageClass* ui;
+	int cfd;
 };
