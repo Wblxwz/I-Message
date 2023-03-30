@@ -7,13 +7,17 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <unordered_map>
 
 #include "connpool.h"
 #include "connraii.h"
 #include "server.h"
-#include "sqloperate.h"
 #include "worker.h"
 #include "threadpool.h"
+
+std::vector<int> cfds;
+std::unordered_map<int, const char*> map;
+std::vector<info*> infos;
 
 void setNonBlock(const int& fd)
 {
@@ -39,7 +43,7 @@ void modFd(const int& epollfd, const int& fd)
 	epoll_event events;
 	events.data.fd = fd;
 	events.events = EPOLLIN | EPOLLET | EPOLLHUP | EPOLLONESHOT;
-	epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &events);
+	assert(epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &events) != -1);
 }
 
 void serverListen()
@@ -52,6 +56,9 @@ void serverListen()
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(8888);
 
+	int tmp = 1;
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp));
+	setsockopt(listenfd, SOL_SOCKET, SO_LINGER, &tmp, sizeof(tmp));
 	int ret = bind(listenfd, (sockaddr*)&addr, sizeof(addr));
 	assert(ret >= 0);
 
@@ -82,6 +89,7 @@ void serverListen()
 					if (connfd < 0)
 						break;
 					addFd(epollfd, connfd, false);
+					cfds.push_back(connfd);
 				}
 			}
 			else if (eve[i].events & EPOLLIN)
@@ -89,7 +97,7 @@ void serverListen()
 				int cfd = eve[i].data.fd;
 				modFd(epollfd, cfd);
 
-				Worker* worker = new Worker(cfd);
+				Worker* worker = new Worker(cfd,infos);
 				pool->add(worker);
 			}
 		}
@@ -104,4 +112,29 @@ int main(int argc, char* argv[])
 	pool->init("localhost", "root", "a2394559659", "imessage", 3306, 5);
 	serverListen();
 	return 0;
+}
+
+void deleteFromCfds(const int& cfd)
+{
+	for (auto it = cfds.begin(); it != cfds.cend(); ++it)
+		if (*it == cfd)
+		{
+			cfds.erase(it);
+			break;
+		}
+}
+
+void addMap(const int& cfd, const char* s)
+{
+	map[cfd] = s;
+}
+
+const char* getAccount(const int& cfd)
+{
+	return map[cfd];
+}
+
+void addInfos(std::vector<info*> info)
+{
+	infos = info;
 }

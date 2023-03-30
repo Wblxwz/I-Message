@@ -2,10 +2,13 @@
 
 #define WORKER_H
 
+#include "sqloperate.h"
+#include <vector>
+
 class Worker
 {
 public:
-	Worker(const int& cfd) :cfd(cfd) 
+	Worker(const int& cfd, std::vector<info*> infos) :cfd(cfd),infos(infos)
 	{
 	}
 	void work();
@@ -14,6 +17,7 @@ public:
 	~Worker();
 private:
 	int cfd;
+	std::vector<info*> infos;
 };
 
 #endif//WORKER_H
