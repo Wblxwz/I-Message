@@ -43,6 +43,16 @@
      <attribute name="title">
       <string>联系人</string>
      </attribute>
+     <widget class="QListView" name="lianxiren">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>281</width>
+        <height>551</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -55,7 +65,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>291</width>
+      <width>221</width>
       <height>41</height>
      </rect>
     </property>
@@ -84,6 +94,42 @@
     </property>
     <property name="text">
      <string>添加好友</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="xinhaoyou">
+    <property name="geometry">
+     <rect>
+      <x>204</x>
+      <y>650</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>新好友(0)</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="bian">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>10</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>bian</string>
     </property>
    </widget>
   </widget>

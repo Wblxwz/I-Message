@@ -8,6 +8,14 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class IMessageClass; };
 QT_END_NAMESPACE
 
+struct info
+{
+	info() :from(""), yanzheng(""), name("") {}
+	QString from;
+	QString yanzheng;
+	QString name;
+};
+
 class IMessage : public QMainWindow
 {
 	Q_OBJECT
@@ -23,4 +31,6 @@ public:
 private:
 	Ui::IMessageClass* ui;
 	int cfd;
+
+	std::vector<info*> infos;
 };

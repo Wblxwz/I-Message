@@ -13,11 +13,17 @@ class AddFriends : public QWidget
 	Q_OBJECT
 
 public:
-	AddFriends(QWidget* parent = nullptr);
+	AddFriends(const int& cfd, QString username, QWidget* parent = nullptr);
 	~AddFriends();
 
 	void showFriends();
+	void addFriends();
+	void init(QString f);
 private:
 	Ui::AddFriendsClass* ui;
 	QStandardItemModel* model;
+
+	int cfd;
+	QString from;
+	QString username;
 };

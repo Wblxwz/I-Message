@@ -184,14 +184,48 @@ void IMessage::logIn()
 			out << ui->account->lineEdit()->text() << "\n";
 		}
 		this->close();
-		MainWindow* m = new MainWindow;
-		m->show();
-		char tbuf[50]{ '0' };
+		MainWindow* m = new MainWindow(cfd);
+		char tbuf[200]{ '0' };
 		sprintf(tbuf, "log:");
 		sprintf(tbuf + strlen(tbuf), ui->account->lineEdit()->text().toStdString().c_str());
 		send(cfd, tbuf, sizeof(tbuf), NULL);
 		recv(cfd, tbuf, sizeof(tbuf), NULL);
-		m->setName(std::string(tbuf));
+		m->setName(std::string(tbuf),ui->account->lineEdit()->text().toStdString().c_str());
+		m->show();
+		std::string tn;
+		char ttbuf[200];
+		recv(cfd, ttbuf, sizeof(ttbuf), NULL);
+		std::string ss(ttbuf), length = "新好友(";
+		for (int i = 2; i < ss.size(); ++i)
+		{
+			length.push_back(ss[i]);
+			tn.push_back(ss[i]);
+		}
+		length.push_back(')');
+		m->setNewFriends(length.c_str());
+		int size = atoi(tn.c_str());
+		for (int i = 0; i < size; ++i)
+		{
+			char nbuf[200];
+			recv(cfd, nbuf, sizeof(nbuf), NULL);
+			std::string sss(nbuf);
+			std::string from, name, yanzheng;
+			int fn = sss.find("name:");
+			for (int j = 5; j < fn; ++j)
+				from.push_back(sss[j]);
+			int fin = sss.find("info:");
+			for (int j = fn + 5; j < fin; ++j)
+				name.push_back(sss[j]);
+			for (int j = fin + 5; j < sss.size(); ++j)
+				yanzheng.push_back(sss[j]);
+
+			info* in = new info;
+			in->from = from.c_str();
+			in->name = name.c_str();
+			in->yanzheng = yanzheng.c_str();
+			infos.push_back(in);
+		}
+		m->setInfos(infos);
 	}
 	else
 		QMessageBox::critical(this, "错误", "账号不存在或密码错误");
